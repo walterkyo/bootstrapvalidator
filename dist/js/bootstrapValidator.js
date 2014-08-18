@@ -350,8 +350,15 @@
                     continue;
                 }
 
-                this.results[field][validatorName] = this.STATUS_VALIDATING;
-                validateResult = $.fn.bootstrapValidator.validators[validatorName].validate(this, $field, validators[validatorName]);
+                if (typeof validators[validatorName].enabled == 'undefined' || validators[validatorName].enabled) {
+
+                    this.results[field][validatorName] = this.STATUS_VALIDATING;
+                    validateResult = $.fn.bootstrapValidator.validators[validatorName].validate(this, $field, validators[validatorName]);
+
+                } else {
+                    // If validator is not enabled, manually set validateResult to true so remaining validators behave normally
+                    validateResult = true;
+                }
 
                 if ('object' == typeof validateResult) {
                     this.updateStatus($field, this.STATUS_VALIDATING, validatorName);
@@ -385,6 +392,10 @@
                 }
 
                 for (validatorName in this.results[field]) {
+                    if (typeof this.options.fields[field].validators[validatorName].enabled !== 'undefined' && !this.options.fields[field].validators[validatorName].enabled) {
+                        continue;
+                    }
+
                     if (this.results[field][validatorName] == this.STATUS_NOT_VALIDATED || this.results[field][validatorName] == this.STATUS_VALIDATING) {
                         return false;
                     }
